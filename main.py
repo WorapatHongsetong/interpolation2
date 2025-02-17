@@ -4,9 +4,15 @@ import matplotlib.pyplot as plt
 import os
 from pprint import pprint
 
+LAZY_NAME = None
+
+
+
 def process_function_input():
     try:
         equation_str = input("Enter the equation with single variable 'x' (e.g., x*sin(x) - x^2 + 1): ")
+        global LAZY_NAME 
+        LAZY_NAME = equation_str
 
         x = sym.symbols('x')
         equation = sym.sympify(equation_str)
@@ -30,6 +36,8 @@ def process_function_input():
 def process_file_input():
     try:
         file_path = input("Input your file path (CSV format): ")
+        global LAZY_NAME        
+        LAZY_NAME = f"DATA: {file_path}"
 
         degree = int(input("Enter the number of points for interpolation: "))
 
@@ -88,12 +96,16 @@ def call_input_options():
 def interpolate_sle(x_vals, y_vals, degree):
     x = sym.symbols('x')
     
-    A = np.vander(x_vals, degree)  
+    A = np.vander(x_vals, degree)
     
     b = np.array(y_vals)
+    
     coeffs = np.linalg.solve(A, b)
     
-    return sum(c * x**i for i, c in enumerate(coeffs))
+    poly = sum(c * x**i for i, c in enumerate(coeffs))
+    
+    return poly
+
 
 def interpolate_lagrange(x_vals, y_vals):
     x = sym.symbols('x')
@@ -115,6 +127,7 @@ def interpolate_parametric(x_vals, y_vals, degree):
 
 def call_interpolation_options(selected_x_vals, selected_y_vals, degree):
     while True:
+      print("\n\n\n\n\n")
       print("Select interpolation option:")
       print("    [0] Interpolation Polynomial solving SLE")
       print("    [1] Interpolation Polynomial using Lagrange")
@@ -155,25 +168,87 @@ def calculate_interpolation_all(poly, interval_start, interval_end):
 
 def calculation():
     x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree = call_input_options()
-    p_x, p_y = call_interpolation_options(selected_x_vals, selected_y_vals, degree)
-    
-    if p_y != None:
-        x_poly, y_poly = p_x, p_y
-        t, intp_x_vals = calculate_interpolation_all(x_poly, interval_start, interval_end)
-        t, intp_y_vals = calculate_interpolation_all(y_poly, interval_start, interval_end)
-        plt.plot(intp_x_vals, intp_y_vals, label="Interpolated Curve")
-        plt.scatter(selected_x_vals, selected_y_vals, color='red', label="Data Points")
-        plt.legend()
-        plt.show()
-    else:
-        intp_x_vals, intp_y_vals = calculate_interpolation_all(p_x, interval_start, interval_end)
-        plt.plot(intp_x_vals, intp_y_vals, label="Interpolated Curve")
-        plt.scatter(selected_x_vals, selected_y_vals, color='red', label="Data Points")
-        plt.legend()
-        plt.show()
 
-    return intp_x_vals, intp_y_vals, x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree
+    while True:
+        print("Select calculation type:")
+        print("    [0] Plot")
+        print("    [1] Single point")
+        option = input("Option: ")
+
+        p_x, p_y = call_interpolation_options(selected_x_vals, selected_y_vals, degree)
+
+        if option == "0":
+            
+            if p_y != None:
+                x_poly, y_poly = p_x, p_y
+                t, intp_x_vals = calculate_interpolation_all(x_poly, interval_start, interval_end)
+                t, intp_y_vals = calculate_interpolation_all(y_poly, interval_start, interval_end)
+                # plt.plot(intp_x_vals, intp_y_vals, label="Interpolated Curve")
+                # plt.scatter(selected_x_vals, selected_y_vals, color='red', label="Data Points")
+                # plt.legend()
+                # plt.show()
+            else:
+                intp_x_vals, intp_y_vals = calculate_interpolation_all(p_x, interval_start, interval_end)
+                # plt.plot(intp_x_vals, intp_y_vals, label="Interpolated Curve")
+                # plt.scatter(selected_x_vals, selected_y_vals, color='red', label="Data Points")
+                # plt.legend()
+                # plt.show()
+
+            print("\n\n\n\n\n")
+        
+            return intp_x_vals, intp_y_vals, x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree
+        
+        if option == "1":
+            print(f"Calculate interpolation from {interval_start} to {interval_end}")
+            input_x = float(input("Calculate interpolation at x = "))
+            intp_x_vals, intp_y_vals, x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree = None, None, None, None, None, None, None, None, None
+            degree = "RETURN VALUE"
+            intp_x_vals = input_x
+            intp_y_vals = calculate_interpolation_at(p_x, input_x)
+
+            
+            print("\n\n\n\n\n")
+
+            return intp_x_vals, intp_y_vals, x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree
+        
+        else:
+            print("Invalid option. Please select 0, or 1.")
+       
+        print("\n\n\n\n\n")
+
+
+
+
+
+
+def plot_original(x_vals, y_vals):
+    plt.plot(x_vals, y_vals, label="Original Data")
+
+def plot_interpolation(intp_x_vals, intp_y_vals):
+    plt.plot(intp_x_vals, intp_y_vals, label="Interpolated Curve") 
+
+def plot_master(intp_x_vals, intp_y_vals, x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end):
+    plt.title(f"{LAZY_NAME} from [{interval_start}, {interval_end}]")
+    plt.scatter(selected_x_vals, selected_y_vals, color='red', label="Data Points")
+
+    plot_original(x_vals, y_vals)
+    plot_interpolation(intp_x_vals, intp_y_vals)
+
+    plt.legend()
+    plt.show()
+
+
+
+
+def run_master():
+    intp_x_vals, intp_y_vals, x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree = calculation()
+
+    if degree == "RETURN VALUE":
+        print(f"Interpolation of {LAZY_NAME}")
+        print(f"At x = {intp_x_vals} is {intp_y_vals}")
+    else:
+        plot_master(intp_x_vals, intp_y_vals, x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end)
 
 
 if __name__ == "__main__":
-    calculation()
+    run_master()
