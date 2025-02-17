@@ -87,9 +87,12 @@ def call_input_options():
 
 def interpolate_sle(x_vals, y_vals, degree):
     x = sym.symbols('x')
-    A = np.vander(x_vals, degree + 1)  
+    
+    A = np.vander(x_vals, degree)  
+    
     b = np.array(y_vals)
-    coeffs = np.linalg.solve(A, b) 
+    coeffs = np.linalg.solve(A, b)
+    
     return sum(c * x**i for i, c in enumerate(coeffs))
 
 def interpolate_lagrange(x_vals, y_vals):
@@ -123,16 +126,16 @@ def call_interpolation_options(selected_x_vals, selected_y_vals, degree):
           # Solve using SLE
           poly = interpolate_sle(selected_x_vals, selected_y_vals, degree)
           print(f"Interpolation Polynomial (SLE): {poly}")
-          return poly
+          return poly, None
       elif option == 1:
           # Solve using Lagrange
           poly = interpolate_lagrange(selected_x_vals, selected_y_vals)
           print(f"Interpolation Polynomial (Lagrange): {poly}")
-          return poly
+          return poly, None
       elif option == 2:
           # Parametric interpolation (for x(t) and y(t))
           x_poly, y_poly = interpolate_parametric(selected_x_vals, selected_y_vals, degree)
-          print(f"Parametric Interpolation Polynomials (x(t), y(t)): \n{x_poly}\n{y_poly}")
+          print(f"Parametric Interpolation p_x (x(t), y(t)): \n{x_poly}\n{y_poly}")
           return x_poly, y_poly
       else:
           print("Invalid option. Please select 0, 1, or 2.")
@@ -142,8 +145,35 @@ def call_interpolation_options(selected_x_vals, selected_y_vals, degree):
 
 
 
+def calculate_interpolation_at(poly, x_val):
+    return poly.subs(sym.symbols('x'), x_val)
 
+def calculate_interpolation_all(poly, interval_start, interval_end):
+    x_vals = np.linspace(interval_start, interval_end, 200)
+    y_vals = np.array([calculate_interpolation_at(poly, x) for x in x_vals], dtype=float)
+    return x_vals, y_vals
+
+def calculation():
+    x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree = call_input_options()
+    p_x, p_y = call_interpolation_options(selected_x_vals, selected_y_vals, degree)
+    
+    if p_y != None:
+        x_poly, y_poly = p_x, p_y
+        t, intp_x_vals = calculate_interpolation_all(x_poly, interval_start, interval_end)
+        t, intp_y_vals = calculate_interpolation_all(y_poly, interval_start, interval_end)
+        plt.plot(intp_x_vals, intp_y_vals, label="Interpolated Curve")
+        plt.scatter(selected_x_vals, selected_y_vals, color='red', label="Data Points")
+        plt.legend()
+        plt.show()
+    else:
+        intp_x_vals, intp_y_vals = calculate_interpolation_all(p_x, interval_start, interval_end)
+        plt.plot(intp_x_vals, intp_y_vals, label="Interpolated Curve")
+        plt.scatter(selected_x_vals, selected_y_vals, color='red', label="Data Points")
+        plt.legend()
+        plt.show()
+
+    return intp_x_vals, intp_y_vals, x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree
 
 
 if __name__ == "__main__":
-    pass
+    calculation()
