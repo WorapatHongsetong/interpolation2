@@ -20,12 +20,12 @@ def process_function_input():
         interval_start = float(input("Enter the interval start: "))
         interval_end = float(input("Enter the interval end: "))
 
-        degree = int(input("Enter the degree of the polynomial: "))
+        degree = int(input("Enter the degree of the polynomial (We need a lot): "))
 
         x_vals = np.linspace(interval_start, interval_end, 200)
         y_vals = np.array([equation.subs(x, val) for val in x_vals], dtype=float)
 
-        selected_x_vals = np.linspace(interval_start, interval_end, degree)
+        selected_x_vals = np.linspace(interval_start, interval_end, degree + 1)
         selected_y_vals = np.array([equation.subs(x, val) for val in selected_x_vals], dtype=float)
 
         return x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree
@@ -51,7 +51,7 @@ def process_file_input():
         interval_start = np.min(x_vals)
         interval_end = np.max(x_vals)
 
-        selected_x_vals = np.linspace(interval_start, interval_end, degree)
+        selected_x_vals = np.linspace(interval_start, interval_end, degree + 1)
 
         selected_y_vals = np.interp(selected_x_vals, x_vals, y_vals)
 
@@ -94,13 +94,20 @@ def call_input_options():
 
 
 def interpolate_sle(x_vals, y_vals, degree):
+    pprint(x_vals)
+    pprint(len(x_vals))
     x = sym.symbols('x')
     
-    A = np.vander(x_vals, degree)
+    A = np.vander(x_vals, len(x_vals))
+    pprint(A)
     
     b = np.array(y_vals)
+
+    pprint(b)
     
     coeffs = np.linalg.solve(A, b)
+
+    pprint(coeffs)
     
     poly = sum(c * x**i for i, c in enumerate(coeffs))
     
