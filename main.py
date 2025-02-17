@@ -23,7 +23,7 @@ def process_function_input():
       selected_x_vals = np.linspace(interval_start, interval_end, degree)
       selected_y_vals = np.array([equation.subs(x, val) for val in x_vals], dtype=float)
       
-      return x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end
+      return x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree
     except Exception as e:
       print(f"Error: {e}")
 
@@ -47,7 +47,7 @@ def process_file_input():
 
       selected_y_vals = np.interp(selected_x_vals, x_vals, y_vals)
 
-      return x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end
+      return x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree
     
     except FileNotFoundError:
       print("Error: The file was not found. Please check the file path.")
@@ -64,20 +64,20 @@ def call_input_options():
 
       option = input("Option: ")
 
-      x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end = None, None, None, None, None, None
+      x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree = None, None, None, None, None, None
 
       if option == "0":
-        x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end = process_function_input()
+        x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree = process_function_input()
       elif option == "1":
-        x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end = process_file_input()
+        x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree = process_file_input()
       else:
          print("\n\n\n\n\n")
          continue
       break
 
-    return x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end
+    return x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree
       
 
 if __name__ == "__main__":
-   x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end = call_input_options()
-   print(x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end)
+   x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree = call_input_options()
+   print(x_vals, y_vals, selected_x_vals, selected_y_vals, interval_start, interval_end, degree)
