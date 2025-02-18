@@ -93,25 +93,16 @@ def call_input_options():
 
 
 
-def interpolate_sle(x_vals, y_vals, degree):
-    pprint(x_vals)
-    pprint(len(x_vals))
+def interpolate_sle(x_points, y_points, degree):
     x = sym.symbols('x')
     
-    A = np.vander(x_vals, len(x_vals))
-    pprint(A)
+    V = np.vander(x_points, increasing=False)
     
-    b = np.array(y_vals)
-
-    pprint(b)
+    coeffs = np.linalg.solve(V, y_points)
     
-    coeffs = np.linalg.solve(A, b)
-
-    pprint(coeffs)
+    poly_expr = sum(c * x**i for i, c in enumerate(reversed(coeffs)))
     
-    poly = sum(c * x**i for i, c in enumerate(coeffs))
-    
-    return poly
+    return sym.simplify(poly_expr)  
 
 
 def interpolate_lagrange(x_vals, y_vals):
